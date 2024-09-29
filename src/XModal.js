@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import './XModal.css'; // Add your styling here
 
 const XModal = () => {
@@ -12,12 +12,26 @@ const XModal = () => {
 
   const modalRef = useRef(null);
 
-  // To handle clicks outside modal to close
+  // Handle clicks outside modal to close it
   const handleClickOutside = (e) => {
     if (modalRef.current && !modalRef.current.contains(e.target)) {
       setIsOpen(false);
     }
   };
+
+  // Add event listener when modal is opened
+  useEffect(() => {
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    } else {
+      document.removeEventListener("mousedown", handleClickOutside);
+    }
+
+    // Clean up event listener when component is unmounted or modal is closed
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
 
   // Open modal
   const openModal = () => setIsOpen(true);
@@ -40,10 +54,9 @@ const XModal = () => {
       return;
     }
 
-    // Use native validation for email
     const emailInput = document.getElementById("email");
     if (!emailInput.checkValidity()) {
-      emailInput.reportValidity(); // Show the browser's built-in email validation message
+      emailInput.reportValidity();
       return;
     }
 
@@ -56,7 +69,7 @@ const XModal = () => {
     const selectedDate = new Date(formData.dob);
 
     if (!formData.dob || selectedDate > today) {
-      alert("Invalid date of birth.Date of birth cannot be in the future.");
+      alert("Invalid date of birth. Please enter a valid date.");
       return;
     }
 
@@ -71,7 +84,7 @@ const XModal = () => {
       <button onClick={openModal}>Open Form</button>
       
       {isOpen && (
-        <div className="modal-content" ref={modalRef} onClick={handleClickOutside}>
+        <div className="modal-content" ref={modalRef}>
           <form onSubmit={handleSubmit}>
             <label htmlFor="username">Username</label>
             <input 
@@ -88,7 +101,7 @@ const XModal = () => {
               id="email" 
               value={formData.email} 
               onChange={handleChange}
-              required // Ensures the email is required
+              required
             />
 
             <label htmlFor="dob">Date of Birth</label>
@@ -118,8 +131,3 @@ const XModal = () => {
 };
 
 export default XModal;
-
-
-
-
-
